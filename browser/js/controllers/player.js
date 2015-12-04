@@ -1,40 +1,24 @@
 app.controller('PlayerCtrl', function($scope, $rootScope, PlayerFactory){
 
-  audio.addEventListener('ended', function () {
-    $scope.next();
-  });
-  audio.addEventListener('timeupdate', function () {
-    $scope.progress = 100 * audio.currentTime / audio.duration;
-    $scope.$digest();
-  });
-
   // state variables
-  $scope.currentSong;
-  $scope.playing = false;
-
-  // // main toggle
-  // $scope.toggle = function (song) {
-  //   if ($scope.playing) $rootScope.$broadcast('pause');
-  //   else $rootScope.$broadcast('play', song);
-  // }
-
+  $scope.currentSong = PlayerFactory.getCurrentSong;
+  $scope.playing = PlayerFactory.isPlaying;
   // main toggle
   $scope.toggle = function(song) {
     PlayerFactory.toggle(song)
   }
-  // // incoming events (from Album or toggle)
-  // $scope.$on('pause', pause);
-  // $scope.$on('play', play);
 
   $scope.next = function() {
+    //solve the album problem: how do we access albums in the player.js file
     PlayerFactory.next();
   }
 
   $scope.prev = function() {
-    PlayerFactory.next();
+    PlayerFactory.prev();
   }
-  // // outgoing events (to Album)
-  // $scope.next = function(){ $rootScope.$broadcast('next'); };
-  // $scope.prev = function(){ $rootScope.$broadcast('prev'); };
+
+  $scope.progress = function() {
+    return PlayerFactory.getProgress();
+  }
 
 });

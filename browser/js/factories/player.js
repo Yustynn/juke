@@ -1,24 +1,26 @@
-app.factory('PlayerFactory', function() {
+app.factory('PlayerFactory', function($rootScope) {
+
   // a "true" modulo that wraps negative to the top of the range
   function mod (num, m) { return ((num%m)+m)%m; };
 
-  // jump `val` spots in album (negative to go back)
-  function
-
-
   // initialize audio player
   var audio = document.createElement('audio'),
-    playing = false;
-    currentSong = null;
+    playing = false,
+    currentSong = null,
+    album = null,
+    progress = null;
 
-  return {
-    toggle: function(song) {
-      playing ? this.pause() : this.play();
+  var factoryExports = {
+    setAlbum: function(newAlbum) {
+      album = newAlbum;
     },
-    skip: function(album, val) {
+    toggle: function(song) {
+      playing ? this.pause() : this.play(song);
+    },
+    skip: function(val) {
       if (!currentSong) return;
       var idx = album.songs.indexOf(currentSong);
-      idx = mod( (idx + (val || 1)),]album.songs.length );
+      idx = mod( (idx + (val || 1)), album.songs.length );
       this.play(album.songs[idx]);
     },
     play: function(song) {
@@ -27,7 +29,7 @@ app.factory('PlayerFactory', function() {
     },
     start: function(song) {
       playing = true;
-      // switch to and play new son
+      // switch to and play new song
       currentSong = song;
       audio.src = song.audioUrl;
       audio.load();
@@ -47,15 +49,26 @@ app.factory('PlayerFactory', function() {
     getCurrentSong: function() {
       return currentSong;
     },
-    next: function(album) {
-      skip(album, 1);
+    next: function() {
+      this.skip(1);
     },
-    previous: function(album) {
+    prev: function() {
       //how does next and previous access album. do we need an http request?
-      skip(album,-1);
+      this.skip(-1);
     },
     getProgress: function() {
-
+      return progress;
     }
   }
+
+
+  audio.addEventListener('ended', function () {
+    factoryExports.next();
+  });
+  audio.addEventListener('timeupdate', function () {
+    progress = 100 * audio.currentTime / audio.duration;
+    $rootScope.$digest();
+  });
+
+  return factoryExports;
 });
